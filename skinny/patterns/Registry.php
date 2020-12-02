@@ -1,11 +1,10 @@
 <?php
 declare(strict_types = 1);
 
-namespace skinny\pattern;
+namespace skinny\patterns;
 
 use RuntimeException;
 use skinny\interfaces\RegistryInterface;
-use skinny\patterns\Singleton;
 
 /**
  * Класс, реализуйщий шаблон проектирования "Реестр" (Registry).

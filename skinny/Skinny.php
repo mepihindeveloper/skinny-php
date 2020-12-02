@@ -9,7 +9,7 @@ use skinny\components\Route;
 use skinny\http\Headers;
 use skinny\http\Request;
 use skinny\http\Response;
-use skinny\pattern\Registry;
+use skinny\patterns\Registry;
 use skinny\patterns\Singleton;
 
 /**

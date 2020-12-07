@@ -21,8 +21,7 @@ use skinny\Settings;
  *
  * @package skinny\components
  */
-class Database
-{
+class Database {
 	
 	/**
 	 * @var PDOStatement[] Список подготовленных запросов к базе данных
@@ -49,14 +48,12 @@ class Database
 	 * @return void
 	 *
 	 */
-	public function connect(array $params = []): void
-	{
+	public function connect(array $params = []): void {
 		$databaseConnectionParams = empty($params) ? Settings::getInstance()->getDatabaseSettings() : $params;
 		
 		$dsn = $databaseConnectionParams['dbms'] . ':';
 		
-		foreach (['host', 'dbname'] as $key)
-		{
+		foreach (['host', 'dbname'] as $key) {
 			$dsn .= "{$key}={$databaseConnectionParams[$key]};";
 		}
 		
@@ -75,18 +72,15 @@ class Database
 	/**
 	 * Закрывает подключение к базе данных
 	 */
-	public function closeConnection(): void
-	{
+	public function closeConnection(): void {
 		$this->pdo = null;
 	}
 	
 	/**
 	 * Начинает транзакцию
 	 */
-	public function beginTransaction(): void
-	{
-		if (!$this->isTransaction)
-		{
+	public function beginTransaction(): void {
+		if (!$this->isTransaction) {
 			$this->pdo->beginTransaction();
 			$this->isTransaction = true;
 		}
@@ -97,25 +91,19 @@ class Database
 	 *
 	 * @throws PDOException
 	 */
-	public function commit(): void
-	{
-		try
-		{
-			if (!empty($this->executeList))
-			{
-				foreach ($this->executeList as $executeQuery)
-				{
+	public function commit(): void {
+		try {
+			if (!empty($this->executeList)) {
+				foreach ($this->executeList as $executeQuery) {
 					$executeQuery->execute();
 				}
 			}
 			
 			$this->pdo->commit();
-		} catch (PDOException $exception)
-		{
+		} catch (PDOException $exception) {
 			$this->pdo->rollBack();
 			throw new PDOException(500, $exception->getMessage(), $exception->getCode());
-		} finally
-		{
+		} finally {
 			$this->isTransaction = false;
 			$this->executeList = [];
 		}
@@ -126,15 +114,14 @@ class Database
 	 *
 	 * @see https://www.php.net/manual/ru/pdostatement.fetchall.php PDOStatement::fetchAll
 	 *
-	 * @param string $query      Запрос
-	 * @param array  $attributes Атрибуты
-	 * @param int    $fetchStyle Определяет содержимое возвращаемого массива
+	 * @param string $query Запрос
+	 * @param array $attributes Атрибуты
+	 * @param int $fetchStyle Определяет содержимое возвращаемого массива
 	 *
 	 * @return array
 	 * @throws PDOException
 	 */
-	public function queryAll(string $query, array $attributes = [], $fetchStyle = PDO::FETCH_ASSOC): array
-	{
+	public function queryAll(string $query, array $attributes = [], $fetchStyle = PDO::FETCH_ASSOC): array {
 		$this->execute($query, $attributes);
 		
 		return $this->pdoStatement->fetchAll($fetchStyle);
@@ -143,14 +130,13 @@ class Database
 	/**
 	 * Выполняет запрос
 	 *
-	 * @param string $query      Запрос
-	 * @param array  $attributes Атрибуты
+	 * @param string $query Запрос
+	 * @param array $attributes Атрибуты
 	 *
 	 * @return bool
 	 * @throws PDOException
 	 */
-	public function execute(string $query, array $attributes = []): bool
-	{
+	public function execute(string $query, array $attributes = []): bool {
 		$this->beforeQuery($query, $attributes);
 		
 		return $this->pdoStatement->execute();
@@ -159,35 +145,29 @@ class Database
 	/**
 	 * Обработка запроса перед выполненениме
 	 *
-	 * @param string $query      Запрос
-	 * @param array  $attributes Атрибуты запроса
+	 * @param string $query Запрос
+	 * @param array $attributes Атрибуты запроса
 	 *
 	 * @return void
 	 * @throws PDOException
 	 */
-	protected function beforeQuery(string $query, array $attributes = []): void
-	{
-		try
-		{
+	protected function beforeQuery(string $query, array $attributes = []): void {
+		try {
 			$this->pdoStatement = $this->pdo->prepare($query);
 			
-			if (!empty($attributes))
-			{
+			if (!empty($attributes)) {
 				$bindedAttributes = $this->bindAttributes($attributes);
 				
-				foreach ($bindedAttributes as $bindedAttribute)
-				{
+				foreach ($bindedAttributes as $bindedAttribute) {
 					$attributesPart = explode("\x7F", $bindedAttribute);
 					$this->pdoStatement->bindParam($attributesPart[0], $attributesPart[1]);
 				}
 			}
 			
-			if ($this->isTransaction)
-			{
+			if ($this->isTransaction) {
 				$this->executeList[] = $this->pdoStatement;
 			}
-		} catch (PDOException $exception)
-		{
+		} catch (PDOException $exception) {
 			throw new PDOException(500, $exception->getMessage(), $exception->getCode());
 		}
 	}
@@ -199,12 +179,10 @@ class Database
 	 *
 	 * @return array
 	 */
-	protected function bindAttributes(array $attributes): array
-	{
+	protected function bindAttributes(array $attributes): array {
 		$bindedAttributes = [];
 		
-		foreach ($attributes as $key => $value)
-		{
+		foreach ($attributes as $key => $value) {
 			$bindedAttributes[] = ':' . $key . "\x7F" . $value;
 		}
 		
@@ -216,15 +194,14 @@ class Database
 	 *
 	 * @see https://www.php.net/manual/ru/pdostatement.fetch.php PDOStatement::fetch
 	 *
-	 * @param string $query      Запрос
-	 * @param array  $attributes Атрибуты
-	 * @param int    $fetchStyle Определяет содержимое возвращаемого массива
+	 * @param string $query Запрос
+	 * @param array $attributes Атрибуты
+	 * @param int $fetchStyle Определяет содержимое возвращаемого массива
 	 *
 	 * @return mixed
 	 * @throws PDOException
 	 */
-	public function queryRow(string $query, array $attributes = [], $fetchStyle = PDO::FETCH_ASSOC)
-	{
+	public function queryRow(string $query, array $attributes = [], $fetchStyle = PDO::FETCH_ASSOC) {
 		$this->execute($query, $attributes);
 		
 		return $this->pdoStatement->fetch($fetchStyle);
@@ -235,20 +212,18 @@ class Database
 	 *
 	 * @see https://www.php.net/manual/ru/pdostatement.fetchcolumn.php PDOStatement::fetchColumn
 	 *
-	 * @param string $query      Запрос
-	 * @param array  $attributes Атрибуты
+	 * @param string $query Запрос
+	 * @param array $attributes Атрибуты
 	 *
 	 * @return array
 	 * @throws PDOException
 	 */
-	public function queryColumn(string $query, array $attributes = []): array
-	{
+	public function queryColumn(string $query, array $attributes = []): array {
 		$this->execute($query, $attributes);
 		$queryCells = $this->pdoStatement->fetchAll(PDO::FETCH_NUM);
 		$cells = [];
 		
-		foreach ($queryCells as $queryCell)
-		{
+		foreach ($queryCells as $queryCell) {
 			$cells[] = $queryCell[0];
 		}
 		
@@ -258,14 +233,13 @@ class Database
 	/**
 	 * Возвращает единственную запись результирующего набора
 	 *
-	 * @param string $query      Запрос
-	 * @param array  $attributes Атрибуты
+	 * @param string $query Запрос
+	 * @param array $attributes Атрибуты
 	 *
 	 * @return mixed
 	 * @throws PDOException
 	 */
-	public function queryOne(string $query, array $attributes = [])
-	{
+	public function queryOne(string $query, array $attributes = []) {
 		$this->execute($query, $attributes);
 		
 		return $this->pdoStatement->fetchColumn();
@@ -278,8 +252,7 @@ class Database
 	 *
 	 * @return string
 	 */
-	public function getLastInsertId(): string
-	{
+	public function getLastInsertId(): string {
 		return $this->pdo->lastInsertId();
 	}
 }

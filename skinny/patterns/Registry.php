@@ -4,6 +4,7 @@ declare(strict_types = 1);
 namespace skinny\patterns;
 
 use RuntimeException;
+use skinny\interfaces\DefaultComponentInterface;
 use skinny\interfaces\RegistryInterface;
 
 /**
@@ -12,8 +13,7 @@ use skinny\interfaces\RegistryInterface;
  *
  * @package skinny\patterns
  */
-class Registry extends Singleton implements RegistryInterface
-{
+class Registry extends Singleton implements RegistryInterface {
 	
 	/**
 	 * @var array Пользовательские компоненты
@@ -23,19 +23,19 @@ class Registry extends Singleton implements RegistryInterface
 	/**
 	 * @inheritDoc
 	 */
-	public function init(array $objects): void
-	{
-		foreach ($objects as $name => $value)
-		{
+	public function init(array $objects): void {
+		foreach ($objects as $name => $value) {
 			$this->objects[$name] = is_subclass_of($value['class'], Singleton::class) ?
 				$value['class']::getInstance() : new $value['class'];
 			
-			if (array_key_exists('params', $value))
-			{
-				foreach ($value['params'] as $property => $propertyValue)
-				{
+			if (array_key_exists('params', $value)) {
+				foreach ($value['params'] as $property => $propertyValue) {
 					$this->objects[$name]->$property = $propertyValue;
 				}
+			}
+			
+			if (array_key_exists(DefaultComponentInterface::class, class_implements($this->objects[$name]))) {
+				$this->objects[$name]->init();
 			}
 		}
 	}
@@ -43,10 +43,8 @@ class Registry extends Singleton implements RegistryInterface
 	/**
 	 * @inheritDoc
 	 */
-	public function get(string $name)
-	{
-		if (!array_key_exists($name, $this->objects))
-		{
+	public function get(string $name) {
+		if (!array_key_exists($name, $this->objects)) {
 			throw new RuntimeException("Ошибка получения компонента из регистра. Отсутствует компонент {$name}.");
 		}
 		
@@ -56,8 +54,7 @@ class Registry extends Singleton implements RegistryInterface
 	/**
 	 * @inheritDoc
 	 */
-	public function getAll(): array
-	{
+	public function getAll(): array {
 		return $this->objects;
 	}
 }

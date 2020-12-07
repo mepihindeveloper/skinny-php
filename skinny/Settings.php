@@ -3,6 +3,7 @@ declare(strict_types = 1);
 
 namespace skinny;
 
+use skinny\components\Logger;
 use skinny\http\Headers;
 use skinny\http\Request;
 use skinny\http\Response;
@@ -13,13 +14,11 @@ use skinny\patterns\Singleton;
  *
  * @package skinny
  */
-class Settings extends Singleton
-{
+class Settings extends Singleton {
 	
 	protected array $settings = [];
 	
-	public function __construct()
-	{
+	public function __construct() {
 		parent::__construct();
 		
 		$this->settings = self::getDefaultSettings();
@@ -30,8 +29,7 @@ class Settings extends Singleton
 	 *
 	 * @return array
 	 */
-	public static function getDefaultSettings(): array
-	{
+	public static function getDefaultSettings(): array {
 		return [
 			'mode' => 'development',
 			'debug' => true,
@@ -46,10 +44,14 @@ class Settings extends Singleton
 			'migration' => [
 				'schema' => 'public',
 				'table' => 'migration',
-				'directory' => (PHP_SAPI === 'cli' ? getenv('PWD') : $_SERVER['DOCUMENT_ROOT']) . '/migrations'
+				'directory' => self::getRootPath() . '/migrations'
 			],
-			'kernelComponents' => self::getDefaultComponents()
+			'defaultComponents' => self::getDefaultComponents()
 		];
+	}
+	
+	public static function getRootPath(): string {
+		return (PHP_SAPI === 'cli' ? getenv('PWD') : $_SERVER['DOCUMENT_ROOT']);
 	}
 	
 	/**
@@ -57,12 +59,17 @@ class Settings extends Singleton
 	 *
 	 * @return string[]
 	 */
-	public static function getDefaultComponents(): array
-	{
+	public static function getDefaultComponents(): array {
 		return [
 			'headers' => ['class' => Headers::class],
 			'request' => ['class' => Request::class],
 			'response' => ['class' => Response::class],
+			'logger' => [
+				'class' => Logger::class, 'path',
+				'params' => [
+					'path' => self::getRootPath() . '/logs'
+				],
+			],
 		];
 	}
 	
@@ -71,8 +78,7 @@ class Settings extends Singleton
 	 *
 	 * @return array
 	 */
-	public function getSettings(): array
-	{
+	public function getSettings(): array {
 		return $this->settings;
 	}
 	
@@ -81,18 +87,15 @@ class Settings extends Singleton
 	 *
 	 * @param array $settings Настройки [key => value]
 	 */
-	public function setSettings(array $settings): void
-	{
+	public function setSettings(array $settings): void {
 		$this->settings = array_merge($this->settings, $settings);
 	}
 	
-	public function getDatabaseSettings(): array
-	{
+	public function getDatabaseSettings(): array {
 		return $this->settings['database'];
 	}
 	
-	public function setDatabaseSettings(array $params): void
-	{
+	public function setDatabaseSettings(array $params): void {
 		$this->settings['database'] = $params;
 	}
 }

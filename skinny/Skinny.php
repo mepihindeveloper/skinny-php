@@ -18,8 +18,7 @@ use skinny\patterns\Singleton;
  *
  * @package skinny
  */
-class Skinny extends Singleton
-{
+class Skinny extends Singleton {
 	
 	/**
 	 * @var Singleton|Settings Настройки приложения
@@ -45,8 +44,7 @@ class Skinny extends Singleton
 	/**
 	 * Конструктор класса Skinny.
 	 */
-	protected function __construct()
-	{
+	protected function __construct() {
 		parent::__construct();
 		
 		$this->settings = Settings::getInstance();
@@ -62,8 +60,7 @@ class Skinny extends Singleton
 	 *
 	 * @return Settings
 	 */
-	public function getSettings(): Settings
-	{
+	public function getSettings(): Settings {
 		return $this->settings;
 	}
 	
@@ -72,8 +69,7 @@ class Skinny extends Singleton
 	 *
 	 * @return array
 	 */
-	public function getDefaultSettings(): array
-	{
+	public function getDefaultSettings(): array {
 		return $this->settings::getDefaultSettings();
 	}
 	
@@ -82,8 +78,7 @@ class Skinny extends Singleton
 	 *
 	 * @return Request
 	 */
-	public function getRequest(): Request
-	{
+	public function getRequest(): Request {
 		return $this->request;
 	}
 	
@@ -92,8 +87,7 @@ class Skinny extends Singleton
 	 *
 	 * @return Response
 	 */
-	public function getResponse(): Response
-	{
+	public function getResponse(): Response {
 		return $this->response;
 	}
 	
@@ -102,67 +96,59 @@ class Skinny extends Singleton
 	 *
 	 * @return Headers
 	 */
-	public function getHeaders(): Headers
-	{
+	public function getHeaders(): Headers {
 		return $this->request->getHeaders();
 	}
 	
 	/**
 	 * Конфигрурует запрос типа GET
 	 */
-	public function get(): void
-	{
+	public function get(): void {
 		$this->mapRoutes($this->request::METHOD_GET, func_get_args());
 	}
 	
 	/**
 	 * Складирует запросы по типу в маршруты
 	 *
-	 * @param string $method    Тип (метод) запроса
-	 * @param array  $arguments Аргументы запроса
+	 * @param string $method Тип (метод) запроса
+	 * @param array $arguments Аргументы запроса
 	 */
-	protected function mapRoutes(string $method, array $arguments): void
-	{
+	protected function mapRoutes(string $method, array $arguments): void {
 		$this->routers[$method][] = (new Route($arguments[0], $arguments[1], $arguments[2]));
 	}
 	
 	/**
 	 * Конфигрурует запрос типа POST
 	 */
-	public function post(): void
-	{
+	public function post(): void {
 		$this->mapRoutes($this->request::METHOD_POST, func_get_args());
 	}
 	
 	/**
 	 * Конфигрурует запрос типа PUT
 	 */
-	public function put(): void
-	{
+	public function put(): void {
 		$this->mapRoutes($this->request::METHOD_PUT, func_get_args());
 	}
 	
 	/**
 	 * Конфигрурует запрос типа PATCH
 	 */
-	public function patch(): void
-	{
+	public function patch(): void {
 		$this->mapRoutes($this->request::METHOD_PATCH, func_get_args());
 	}
 	
 	/**
 	 * Конфигрурует запрос типа DELETE
 	 */
-	public function delete(): void
-	{
+	public function delete(): void {
 		$this->mapRoutes($this->request::METHOD_DELETE, func_get_args());
 	}
 	
 	/**
 	 * Конфигрурует запрос типа OPTIONS
 	 */
-	public function options(): void
-	{
+	public function options(): void {
 		$this->mapRoutes($this->request::METHOD_OPTIONS, func_get_args());
 	}
 	
@@ -170,27 +156,21 @@ class Skinny extends Singleton
 	 * @return bool
 	 * @throws InvalidArgumentException
 	 */
-	public function run(): bool
-	{
-		foreach ($this->routers as $method => $routes)
-		{
-			if ($method !== $this->request->getRequestMethod())
-			{
+	public function run(): bool {
+		foreach ($this->routers as $method => $routes) {
+			if ($method !== $this->request->getRequestMethod()) {
 				continue;
 			}
 			
 			/** @var Route $route */
-			foreach ($routes as $route)
-			{
-				if (!$route->match())
-				{
+			foreach ($routes as $route) {
+				if (!$route->match()) {
 					continue;
 				}
 				
 				echo call_user_func_array($route->getCallback(), $route->getParams());
 				
-				if ($this->response->getFormat() !== $this->response::FORMAT_HTML)
-				{
+				if ($this->response->getFormat() !== $this->response::FORMAT_HTML) {
 					exit();
 				}
 				
@@ -201,8 +181,7 @@ class Skinny extends Singleton
 		return false;
 	}
 	
-	public function getDatabase(): Database
-	{
+	public function getDatabase(): Database {
 		return $this->database;
 	}
 }

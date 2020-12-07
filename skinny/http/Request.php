@@ -6,7 +6,6 @@ namespace skinny\http;
 use HttpUrlException;
 use InvalidArgumentException;
 use RuntimeException;
-use skinny\patterns\Singleton;
 
 /**
  * Класс управления запросами.
@@ -15,8 +14,7 @@ use skinny\patterns\Singleton;
  *
  * @package skinny\http
  */
-class Request extends Singleton
-{
+class Request extends Http {
 	
 	public const METHOD_HEAD = 'HEAD';
 	public const METHOD_GET = 'GET';
@@ -25,25 +23,13 @@ class Request extends Singleton
 	public const METHOD_PATCH = 'PATCH';
 	public const METHOD_DELETE = 'DELETE';
 	public const METHOD_OPTIONS = 'OPTIONS';
-	/**
-	 * @var Headers
-	 */
-	protected Headers $headers;
-	
-	protected function __construct()
-	{
-		parent::__construct();
-		
-		$this->headers = Headers::getInstance();
-	}
 	
 	/**
 	 * Возвращает объект работы с заголовками
 	 *
 	 * @return Headers
 	 */
-	public function getHeaders(): Headers
-	{
+	public function getHeaders(): Headers {
 		return $this->headers;
 	}
 	
@@ -53,8 +39,7 @@ class Request extends Singleton
 	 * @return bool
 	 * @throws InvalidArgumentException
 	 */
-	public function isGet(): bool
-	{
+	public function isGet(): bool {
 		return $this->getRequestMethod() === self::METHOD_GET;
 	}
 	
@@ -64,10 +49,8 @@ class Request extends Singleton
 	 * @return string
 	 * @throws InvalidArgumentException
 	 */
-	public function getRequestMethod(): string
-	{
-		if ($this->headers->has('X-Http-Method-Override'))
-		{
+	public function getRequestMethod(): string {
+		if ($this->headers->has('X-Http-Method-Override')) {
 			return strtoupper($this->headers->get('X-Http-Method-Override'));
 		}
 		
@@ -80,8 +63,7 @@ class Request extends Singleton
 	 * @return bool
 	 * @throws InvalidArgumentException
 	 */
-	public function isPost(): bool
-	{
+	public function isPost(): bool {
 		return $this->getRequestMethod() === self::METHOD_POST;
 	}
 	
@@ -93,8 +75,7 @@ class Request extends Singleton
 	 * @see isAjax()
 	 *
 	 */
-	public function isXhr(): bool
-	{
+	public function isXhr(): bool {
 		return $this->isAjax();
 	}
 	
@@ -104,8 +85,7 @@ class Request extends Singleton
 	 * @return bool
 	 * @throws InvalidArgumentException
 	 */
-	public function isAjax(): bool
-	{
+	public function isAjax(): bool {
 		return $this->headers->get('X-Requested-With') === 'XMLHttpRequest';
 	}
 	
@@ -115,8 +95,7 @@ class Request extends Singleton
 	 * @return bool
 	 * @throws InvalidArgumentException
 	 */
-	public function isPut(): bool
-	{
+	public function isPut(): bool {
 		return $this->getRequestMethod() === self::METHOD_PUT;
 	}
 	
@@ -126,8 +105,7 @@ class Request extends Singleton
 	 * @return bool
 	 * @throws InvalidArgumentException
 	 */
-	public function isDelete(): bool
-	{
+	public function isDelete(): bool {
 		return $this->getRequestMethod() === self::METHOD_DELETE;
 	}
 	
@@ -137,8 +115,7 @@ class Request extends Singleton
 	 * @return bool
 	 * @throws InvalidArgumentException
 	 */
-	public function isPatch(): bool
-	{
+	public function isPatch(): bool {
 		return $this->getRequestMethod() === self::METHOD_PATCH;
 	}
 	
@@ -148,8 +125,7 @@ class Request extends Singleton
 	 * @return bool
 	 * @throws InvalidArgumentException
 	 */
-	public function isOptions(): bool
-	{
+	public function isOptions(): bool {
 		return $this->getRequestMethod() === self::METHOD_OPTIONS;
 	}
 	
@@ -159,8 +135,7 @@ class Request extends Singleton
 	 * @return bool
 	 * @throws InvalidArgumentException
 	 */
-	public function isHead(): bool
-	{
+	public function isHead(): bool {
 		return $this->getRequestMethod() === self::METHOD_HEAD;
 	}
 	
@@ -171,8 +146,7 @@ class Request extends Singleton
 	 *
 	 * @return mixed
 	 */
-	public function get(string $key = null)
-	{
+	public function get(string $key = null) {
 		return is_null($key) ? $_GET : $_GET[$key];
 	}
 	
@@ -183,8 +157,7 @@ class Request extends Singleton
 	 *
 	 * @return mixed
 	 */
-	public function post(string $key = null)
-	{
+	public function post(string $key = null) {
 		return is_null($key) ? $_POST : $_POST[$key];
 	}
 	
@@ -193,8 +166,7 @@ class Request extends Singleton
 	 *
 	 * @return string|null
 	 */
-	public function getRemoteHost(): ?string
-	{
+	public function getRemoteHost(): ?string {
 		return $_SERVER['REMOTE_HOST'] ?? null;
 	}
 	
@@ -203,8 +175,7 @@ class Request extends Singleton
 	 *
 	 * @return string|null
 	 */
-	public function getRemoteIP(): ?string
-	{
+	public function getRemoteIP(): ?string {
 		return $_SERVER['REMOTE_ADDR'] ?? null;
 	}
 	
@@ -214,8 +185,7 @@ class Request extends Singleton
 	 * @return string
 	 * @throws InvalidArgumentException
 	 */
-	public function getUserAgent(): string
-	{
+	public function getUserAgent(): string {
 		return $this->headers->get('User-Agent');
 	}
 	
@@ -225,8 +195,7 @@ class Request extends Singleton
 	 * @return string
 	 * @throws InvalidArgumentException
 	 */
-	public function getReferrer(): string
-	{
+	public function getReferrer(): string {
 		return $this->headers->get('Referer');
 	}
 	
@@ -235,8 +204,7 @@ class Request extends Singleton
 	 *
 	 * @return string
 	 */
-	public function getServerName(): string
-	{
+	public function getServerName(): string {
 		return $_SERVER['SERVER_NAME'];
 	}
 	
@@ -246,8 +214,7 @@ class Request extends Singleton
 	 * @return string
 	 * @throws InvalidArgumentException
 	 */
-	public function getContentType(): string
-	{
+	public function getContentType(): string {
 		return $_SERVER['CONTENT_TYPE'] ?? $this->headers->get('Content-Type');
 	}
 	
@@ -257,8 +224,7 @@ class Request extends Singleton
 	 * @return mixed
 	 * @throws InvalidArgumentException
 	 */
-	public function getHostName()
-	{
+	public function getHostName() {
 		return parse_url($this->getHostInfo(), PHP_URL_HOST);
 	}
 	
@@ -268,25 +234,20 @@ class Request extends Singleton
 	 * @return string|null
 	 * @throws InvalidArgumentException
 	 */
-	public function getHostInfo(): ?string
-	{
+	public function getHostInfo(): ?string {
 		$isSecure = $this->isSecureConnection();
 		$protocol = $isSecure ? 'https' : 'http';
 		$hostInfo = null;
 		
-		if ($this->headers->has('X-Forwarded-Host'))
-		{
+		if ($this->headers->has('X-Forwarded-Host')) {
 			$hostInfo = "{$protocol}://" . trim(explode(',', $this->headers->get('X-Forwarded-Host'))[0]);
-		} else if ($this->headers->has('Host'))
-		{
+		} else if ($this->headers->has('Host')) {
 			$hostInfo = "{$protocol}://" . $this->headers->get('Host');
-		} else if (isset($_SERVER['SERVER_NAME']))
-		{
+		} else if (isset($_SERVER['SERVER_NAME'])) {
 			$hostInfo = "{$protocol}://" . $_SERVER['SERVER_NAME'];
 			$port = $isSecure ? $this->getSecurePort() : $this->getPort();
 			
-			if (($port !== 80 && !$isSecure) || ($port !== 443 && $isSecure))
-			{
+			if (($port !== 80 && !$isSecure) || ($port !== 443 && $isSecure)) {
 				$hostInfo .= ":{$port}";
 			}
 		}
@@ -299,8 +260,7 @@ class Request extends Singleton
 	 *
 	 * @return bool
 	 */
-	public function isSecureConnection(): bool
-	{
+	public function isSecureConnection(): bool {
 		return (isset($_SERVER['HTTPS']) && (strcasecmp($_SERVER['HTTPS'], 'on') === 0 || $_SERVER['HTTPS'] === 1));
 	}
 	
@@ -309,8 +269,7 @@ class Request extends Singleton
 	 *
 	 * @return int
 	 */
-	public function getSecurePort(): int
-	{
+	public function getSecurePort(): int {
 		$serverPort = $this->getServerPort();
 		
 		return !$this->isSecureConnection() && $serverPort !== null ? $serverPort : 443;
@@ -321,8 +280,7 @@ class Request extends Singleton
 	 *
 	 * @return int|null
 	 */
-	public function getServerPort(): ?int
-	{
+	public function getServerPort(): ?int {
 		return $_SERVER['SERVER_PORT'] ?? null;
 	}
 	
@@ -332,8 +290,7 @@ class Request extends Singleton
 	 *
 	 * @return int
 	 */
-	public function getPort(): int
-	{
+	public function getPort(): int {
 		$serverPort = $this->getServerPort();
 		
 		return !$this->isSecureConnection() && $serverPort !== null ? $serverPort : 80;
@@ -346,32 +303,24 @@ class Request extends Singleton
 	 *
 	 * @throws HttpUrlException
 	 */
-	public function getScriptUrl(): string
-	{
+	public function getScriptUrl(): string {
 		$scriptFile = $this->getScriptFile();
 		$scriptName = basename($scriptFile);
 		$scriptUrl = '';
 		
-		if (isset($_SERVER['SCRIPT_NAME']) && basename($_SERVER['SCRIPT_NAME']) === $scriptName)
-		{
+		if (isset($_SERVER['SCRIPT_NAME']) && basename($_SERVER['SCRIPT_NAME']) === $scriptName) {
 			$scriptUrl = $_SERVER['SCRIPT_NAME'];
-		} else if (isset($_SERVER['PHP_SELF']))
-		{
-			if (basename($_SERVER['PHP_SELF']) === $scriptName)
-			{
+		} else if (isset($_SERVER['PHP_SELF'])) {
+			if (basename($_SERVER['PHP_SELF']) === $scriptName) {
 				$scriptUrl = $_SERVER['PHP_SELF'];
-			} else if (($pos = strpos($_SERVER['PHP_SELF'], '/' . $scriptName)) !== false)
-			{
+			} else if (($pos = strpos($_SERVER['PHP_SELF'], '/' . $scriptName)) !== false) {
 				$scriptUrl = substr($_SERVER['SCRIPT_NAME'], 0, $pos) . '/' . $scriptName;
 			}
-		} else if (isset($_SERVER['ORIG_SCRIPT_NAME']) && basename($_SERVER['ORIG_SCRIPT_NAME']) === $scriptName)
-		{
+		} else if (isset($_SERVER['ORIG_SCRIPT_NAME']) && basename($_SERVER['ORIG_SCRIPT_NAME']) === $scriptName) {
 			$scriptUrl = $_SERVER['ORIG_SCRIPT_NAME'];
-		} else if (!empty($_SERVER['DOCUMENT_ROOT']) && strpos($scriptFile, $_SERVER['DOCUMENT_ROOT']) === 0)
-		{
+		} else if (!empty($_SERVER['DOCUMENT_ROOT']) && strpos($scriptFile, $_SERVER['DOCUMENT_ROOT']) === 0) {
 			$scriptUrl = str_replace([$_SERVER['DOCUMENT_ROOT'], '\\'], ['', '/'], $scriptFile);
-		} else
-		{
+		} else {
 			throw new HttpUrlException('Невозможно определить URL сценария входа.');
 		}
 		
@@ -385,10 +334,8 @@ class Request extends Singleton
 	 *
 	 * @throws RuntimeException
 	 */
-	public function getScriptFile(): string
-	{
-		if (isset($_SERVER['SCRIPT_FILENAME']))
-		{
+	public function getScriptFile(): string {
+		if (isset($_SERVER['SCRIPT_FILENAME'])) {
 			return $_SERVER['SCRIPT_FILENAME'];
 		}
 		
@@ -400,8 +347,7 @@ class Request extends Singleton
 	 *
 	 * @return string
 	 */
-	public function getQueryString(): string
-	{
+	public function getQueryString(): string {
 		return $_SERVER['QUERY_STRING'] ?? '';
 	}
 }

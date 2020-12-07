@@ -11,8 +11,7 @@ use RuntimeException;
  *
  * @package skinny\patterns
  */
-class Singleton
-{
+class Singleton {
 	
 	/**
 	 * @var array Массив объектов одиночки и экземпляров кокретных подклассов
@@ -23,8 +22,7 @@ class Singleton
 	 * Конструктор Одиночки.
 	 * Всегда скрытым, чтобы предотвратить создание объекта через оператор new.
 	 */
-	protected function __construct()
-	{
+	protected function __construct() {
 	}
 	
 	/**
@@ -34,11 +32,9 @@ class Singleton
 	 *
 	 * @return static::class
 	 */
-	public static function getInstance(): Singleton
-	{
+	public static function getInstance(): Singleton {
 		$subclass = static::class;
-		if (!isset(self::$instances[$subclass]))
-		{
+		if (!isset(self::$instances[$subclass])) {
 			self::$instances[$subclass] = new static;
 		}
 		
@@ -50,8 +46,7 @@ class Singleton
 	 *
 	 * @return array
 	 */
-	public static function getAllInstances(): array
-	{
+	public static function getAllInstances(): array {
 		return self::$instances;
 	}
 	
@@ -60,15 +55,13 @@ class Singleton
 	 *
 	 * @throws RuntimeException
 	 */
-	public function __wakeup()
-	{
+	public function __wakeup() {
 		throw new RuntimeException("Невозможно десериализовать синглтон.");
 	}
 	
 	/**
 	 * Запрещает копирование Singleton.
 	 */
-	protected function __clone()
-	{
+	protected function __clone() {
 	}
 }

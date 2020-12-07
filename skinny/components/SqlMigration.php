@@ -15,8 +15,7 @@ use skinny\Settings;
  *
  * @package skinny\components
  */
-class SqlMigration
-{
+class SqlMigration {
 	
 	/**
 	 * @var Database|null Объект соединения с базой данных
@@ -30,8 +29,7 @@ class SqlMigration
 	/**
 	 * Создает соединение с базой данных и получает конфигурацию миграций
 	 */
-	public function __construct()
-	{
+	public function __construct() {
 		$this->database = new Database();
 		$this->settings = Settings::getInstance()->getSettings()['migration'];
 		$this->init();
@@ -40,8 +38,7 @@ class SqlMigration
 	/**
 	 * Инициализация сервиса миграций
 	 */
-	protected function init(): void
-	{
+	protected function init(): void {
 		$this->database->connect();
 		$sql = "
 			SELECT EXISTS (
@@ -53,8 +50,7 @@ class SqlMigration
         	);
         ";
 		
-		if (!$this->database->queryOne($sql))
-		{
+		if (!$this->database->queryOne($sql)) {
 			$this->createMigrationTable();
 		}
 	}
@@ -62,8 +58,7 @@ class SqlMigration
 	/**
 	 * Создает таблицу миграций
 	 */
-	protected function createMigrationTable(): void
-	{
+	protected function createMigrationTable(): void {
 		$sql = "
 			CREATE TABLE IF NOT EXISTS {$this->settings['schema']}.{$this->settings['table']} (
             	\"name\" varchar(180) COLLATE \"default\" NOT NULL,
@@ -72,15 +67,13 @@ class SqlMigration
 	        ) WITH (OIDS=FALSE)
         ";
 		
-		if (!$this->database->execute($sql))
-		{
+		if (!$this->database->execute($sql)) {
 			exit (Console::writeError('Ошибка создания таблицы миграции'));
 		}
 		
 		$sql = "ALTER TABLE {$this->settings['schema']}.{$this->settings['table']}";
 		
-		if (!$this->database->execute($sql))
-		{
+		if (!$this->database->execute($sql)) {
 			exit (Console::writeError('Ошибка при смене владельца таблицы миграции'));
 		}
 		
@@ -90,8 +83,7 @@ class SqlMigration
 	/**
 	 * Завершает соединение с базой данных
 	 */
-	public function __destruct()
-	{
+	public function __destruct() {
 		$this->database->closeConnection();
 		$this->database = null;
 	}
@@ -101,18 +93,15 @@ class SqlMigration
 	 *
 	 * @param string $name Название миграции
 	 */
-	public function create(string $name): void
-	{
-		if (!preg_match('/^[\w]+$/', $name))
-		{
+	public function create(string $name): void {
+		if (!preg_match('/^[\w]+$/', $name)) {
 			throw new RuntimeException('Имя миграции должно содержать только буквы, цифры и символы подчеркивания.');
 		}
 		
 		$migrationName = $this->generateMigrationName($name);
 		$migrationPath = "{$this->settings['directory']}/{$migrationName}";
 		
-		if (!mkdir($migrationPath) && !is_dir($migrationPath))
-		{
+		if (!mkdir($migrationPath) && !is_dir($migrationPath)) {
 			throw new RuntimeException(sprintf('Ошибка создания директории. Директория "%s" не была создана', $migrationPath));
 		}
 		
@@ -131,8 +120,7 @@ class SqlMigration
 	 *
 	 * @return string Имя файла миграции
 	 */
-	protected function generateMigrationName(string $name): string
-	{
+	protected function generateMigrationName(string $name): string {
 		return 'm' . gmdate('Ymd_His') . "_{$name}";
 	}
 	
@@ -141,18 +129,15 @@ class SqlMigration
 	 *
 	 * @param int $limit Ограничение длины списка (null - полный список)
 	 */
-	public function history(int $limit = 0): void
-	{
+	public function history(int $limit = 0): void {
 		$migrationsList = $this->getMigrationHistory($limit);
 		
-		if (empty($migrationsList))
-		{
+		if (empty($migrationsList)) {
 			Console::writeLine('История мираций пуста.');
 			exit();
 		}
 		
-		foreach ($migrationsList as $history)
-		{
+		foreach ($migrationsList as $history) {
 			Console::writeLine('Миграция ' . $history['name'] . ' от ' . date('Y-m-d H:i:s', $history['apply_time']));
 		}
 	}
@@ -164,8 +149,7 @@ class SqlMigration
 	 *
 	 * @return array Список примененных миграций
 	 */
-	protected function getMigrationHistory(int $limit = 0): array
-	{
+	protected function getMigrationHistory(int $limit = 0): array {
 		$limitSql = $limit === 0 ? '' : "LIMIT {$limit}";
 		$sql = "
 			SELECT name, apply_time
@@ -179,12 +163,10 @@ class SqlMigration
 	/**
 	 * Выводит на экран список  непримененных миграций
 	 */
-	public function new(): void
-	{
+	public function new(): void {
 		$migrationsList = $this->getUnappliedMigrationList();
 		
-		foreach ($migrationsList as $migration)
-		{
+		foreach ($migrationsList as $migration) {
 			Console::writeLine('Имеется непримененная миграция  ' . $migration['name'] . ' от ' . $migration['date_time']);
 		}
 	}
@@ -194,23 +176,19 @@ class SqlMigration
 	 *
 	 * @return array Список непримененных миграций
 	 */
-	protected function getUnappliedMigrationList(): array
-	{
+	protected function getUnappliedMigrationList(): array {
 		$migrationsAppliedList = $this->getMigrationHistory();
 		$migrationsAppliedListNormalizes = [];
 		
-		foreach ($migrationsAppliedList as $migration)
-		{
+		foreach ($migrationsAppliedList as $migration) {
 			$migrationsAppliedListNormalizes[$migration['name']] = true;
 		}
 		
 		$migrationsUnapplied = [];
 		$directoryList = glob("{$this->settings['folder']}/m*_*_*");
 		
-		foreach ($directoryList as $directory)
-		{
-			if (!is_dir($directory))
-			{
+		foreach ($directoryList as $directory) {
+			if (!is_dir($directory)) {
 				continue;
 			}
 			
@@ -218,8 +196,7 @@ class SqlMigration
 			preg_match('/^(m(\d{8}_?\d{6})\D.*?)$/is', end($directoryParts), $matches);
 			$migrationName = $matches[1];
 			
-			if (!isset($migrationsAppliedListNormalizes[$migrationName]))
-			{
+			if (!isset($migrationsAppliedListNormalizes[$migrationName])) {
 				$migrationDateTime = DateTime::createFromFormat('Ymd_His', $matches[2])->format('Y-m-d H:i:s');
 				$migrationsUnapplied[] = [
 					'path' => $directory,
@@ -239,13 +216,11 @@ class SqlMigration
 	 *
 	 * @param string $count Количество применяемых миграция (null - применить все)
 	 */
-	public function up(string $count = ''): void
-	{
+	public function up(string $count = ''): void {
 		$migrationsUnappliedList = $this->getUnappliedMigrationList();
 		$migrationsCountToApply = empty($count) ? count($migrationsUnappliedList) : (int)$count;
 		
-		for ($migrationIndex = 0; $migrationIndex < $migrationsCountToApply; $migrationIndex++)
-		{
+		for ($migrationIndex = 0; $migrationIndex < $migrationsCountToApply; $migrationIndex++) {
 			$migration = $migrationsUnappliedList[$migrationIndex];
 			$migrationBody = file_get_contents("{$migration['path']}/up.sql");
 			
@@ -263,8 +238,7 @@ class SqlMigration
 	 *
 	 * @param string $name Наименованеи миграции
 	 */
-	protected function addMigrationHistory(string $name): void
-	{
+	protected function addMigrationHistory(string $name): void {
 		$sql = "INSERT INTO {$this->settings['table']} (name, apply_time) VALUES(:name, :apply_time)";
 		$this->database->execute($sql, ['name' => $name, 'apply_time' => time()]);
 		
@@ -276,13 +250,11 @@ class SqlMigration
 	 *
 	 * @param string $count Количество отменяемых миграция (null - отменить все)
 	 */
-	public function down(string $count = ''): void
-	{
+	public function down(string $count = ''): void {
 		$migrationsApplied = $this->getMigrationHistory();
 		$migrationsDownCount = empty($count) ? count($migrationsApplied) : (int)$count;
 		
-		for ($migrationIndex = 0; $migrationIndex < $migrationsDownCount; $migrationIndex++)
-		{
+		for ($migrationIndex = 0; $migrationIndex < $migrationsDownCount; $migrationIndex++) {
 			$migration = $migrationsApplied[$migrationIndex];
 			$migrationBody = file_get_contents("{$this->settings['folder']}/{$migration['name']}/down.sql");
 			
@@ -300,8 +272,7 @@ class SqlMigration
 	 *
 	 * @param string $name Наименование миграции
 	 */
-	public function removeMigrationHistory(string $name): void
-	{
+	public function removeMigrationHistory(string $name): void {
 		$sql = "DELETE FROM {$this->settings['table']} WHERE \"name\" = :name";
 		$this->database->execute($sql, ['name' => $name]);
 		

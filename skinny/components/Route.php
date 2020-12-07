@@ -11,8 +11,7 @@ use skinny\http\Request;
  *
  * @package skinny\components
  */
-class Route
-{
+class Route {
 	
 	/**
 	 * @var string Название (псевдоним) маршрута
@@ -34,12 +33,11 @@ class Route
 	/**
 	 * Конструктор класса маршрута.
 	 *
-	 * @param string   $name     Название (псевдоним) маршрута
-	 * @param string   $pattern  Шаблон запроса к маршруту
+	 * @param string $name Название (псевдоним) маршрута
+	 * @param string $pattern Шаблон запроса к маршруту
 	 * @param callable $callback Функция обработки маршрута (исполнение маршрута)
 	 */
-	public function __construct(string $name, string $pattern, callable $callback)
-	{
+	public function __construct(string $name, string $pattern, callable $callback) {
 		$this->setName($name);
 		$this->setPattern($pattern);
 		$this->setCallback($callback);
@@ -51,8 +49,7 @@ class Route
 	 *
 	 * @return bool
 	 */
-	public function match(): bool
-	{
+	public function match(): bool {
 		return (bool)preg_match("#^{$this->pattern}$#", Request::getInstance()->getQueryString());
 	}
 	
@@ -61,8 +58,7 @@ class Route
 	 *
 	 * @return string
 	 */
-	public function getName(): string
-	{
+	public function getName(): string {
 		return $this->name;
 	}
 	
@@ -71,8 +67,7 @@ class Route
 	 *
 	 * @param string $name Название (псевдоним) маршрута
 	 */
-	protected function setName(string $name): void
-	{
+	protected function setName(string $name): void {
 		$this->name = $name;
 	}
 	
@@ -81,8 +76,7 @@ class Route
 	 *
 	 * @return string
 	 */
-	public function getPattern(): string
-	{
+	public function getPattern(): string {
 		return $this->pattern;
 	}
 	
@@ -91,8 +85,7 @@ class Route
 	 *
 	 * @param string $pattern Шаблон запроса к маршруту
 	 */
-	protected function setPattern(string $pattern): void
-	{
+	protected function setPattern(string $pattern): void {
 		$this->pattern = $pattern;
 	}
 	
@@ -101,8 +94,7 @@ class Route
 	 *
 	 * @return callable
 	 */
-	public function getCallback(): callable
-	{
+	public function getCallback(): callable {
 		return $this->callback;
 	}
 	
@@ -113,10 +105,8 @@ class Route
 	 *
 	 * @throws InvalidArgumentException
 	 */
-	protected function setCallback(callable $callback): void
-	{
-		if (!is_callable($callback))
-		{
+	protected function setCallback(callable $callback): void {
+		if (!is_callable($callback)) {
 			throw new InvalidArgumentException('Ошибка аргумента выполняемой функции. Функция callback должна быть вызываема.');
 		}
 		
@@ -128,19 +118,16 @@ class Route
 	 *
 	 * @return array
 	 */
-	public function getParams(): array
-	{
+	public function getParams(): array {
 		return $this->params;
 	}
 	
 	/**
 	 * Устанавливает параметры запроса
 	 */
-	protected function setParams(): void
-	{
+	protected function setParams(): void {
 		preg_match("#^{$this->pattern}$#", Request::getInstance()->getQueryString(), $matches);
-		$this->params = array_filter($matches, static function($value, $key)
-		{
+		$this->params = array_filter($matches, static function($value, $key) {
 			return !is_numeric($key) && !empty($value);
 		}, ARRAY_FILTER_USE_BOTH);
 	}

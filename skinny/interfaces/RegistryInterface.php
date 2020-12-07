@@ -8,8 +8,7 @@ namespace skinny\interfaces;
  *
  * @package skinny\interfaces
  */
-interface RegistryInterface
-{
+interface RegistryInterface {
 	
 	/**
 	 * Инициализация реестра

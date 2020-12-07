@@ -4,7 +4,6 @@ declare(strict_types = 1);
 namespace skinny\http;
 
 use JsonException;
-use skinny\patterns\Singleton;
 
 /**
  * Класс управления ответами.
@@ -12,8 +11,7 @@ use skinny\patterns\Singleton;
  *
  * @package skinny\http
  */
-class Response extends Singleton
-{
+class Response extends Http {
 	
 	public const HTTP_CONTINUE = 100;
 	public const HTTP_SWITCHING_PROTOCOLS = 101;
@@ -152,23 +150,14 @@ class Response extends Singleton
 		self::HTTP_NETWORK_AUTHENTICATION_REQUIRED => 'Network Authentication Required',
 		self::HTTP_NETWORK_CONNECTION_TIMEOUT_ERROR => 'Network Connect Timeout Error',
 	];
-	protected Headers $headers;
 	protected string $format = self::FORMAT_HTML;
-	
-	public function __construct()
-	{
-		parent::__construct();
-		
-		$this->headers = Headers::getInstance();
-	}
 	
 	/**
 	 * Возвращает массив кодов и текстов HTTP ошибок
 	 *
 	 * @return string[]
 	 */
-	public static function getMessages(): array
-	{
+	public static function getMessages(): array {
 		return self::$messages;
 	}
 	
@@ -179,43 +168,37 @@ class Response extends Singleton
 	 *
 	 * @return string
 	 */
-	public function getStatusCodeMessage(int $statusCode): string
-	{
+	public function getStatusCodeMessage(int $statusCode): string {
 		return self::$messages[$statusCode];
 	}
 	
 	/**
 	 * Отправляет JSON ответ на запрос
 	 *
-	 * @param array $data       Данные ответа
-	 * @param int   $statusCode Код ответа
-	 * @param int   $mask       JSON маска
+	 * @param array $data Данные ответа
+	 * @param int $statusCode Код ответа
+	 * @param int $mask JSON маска
 	 *
 	 * {@see JSON_PARTIAL_OUTPUT_ON_ERROR} takes precedence over JSON_THROW_ON_ERROR.
 	 *
 	 * @return string
 	 */
-	public function json(array $data, int $statusCode = self::HTTP_OK, int $mask = JSON_THROW_ON_ERROR): string
-	{
+	public function json(array $data, int $statusCode = self::HTTP_OK, int $mask = JSON_THROW_ON_ERROR): string {
 		$this->headers->removeAll();
 		$this->headers->add(['Content-Type' => 'application/json']);
 		
-		try
-		{
+		try {
 			$json = json_encode($data, $mask);
 			
-			if ($json === false)
-			{
+			if ($json === false) {
 				throw new JsonException('Ошибка формирования JSON.');
 			}
 			
 			http_response_code($statusCode);
-		} catch (JsonException $exception)
-		{
+		} catch (JsonException $exception) {
 			$json = json_encode(["jsonError" => json_last_error_msg()]);
 			
-			if ($json === false)
-			{
+			if ($json === false) {
 				$json = '{"jsonError":"unknown"}';
 			}
 			
@@ -227,19 +210,17 @@ class Response extends Singleton
 		return $json;
 	}
 	
-	public function getFormat(): string
-	{
+	public function getFormat(): string {
 		return $this->format;
 	}
 	
 	/**
 	 * Реализует перенаправление с опциональным кодом.
 	 *
-	 * @param string $url        Адрес перенаправления
-	 * @param int    $statusCode Код ответа
+	 * @param string $url Адрес перенаправления
+	 * @param int $statusCode Код ответа
 	 */
-	public function redirect(string $url, int $statusCode = self::HTTP_OK): void
-	{
+	public function redirect(string $url, int $statusCode = self::HTTP_OK): void {
 		$this->headers->removeAll();
 		http_response_code($statusCode);
 		$this->headers->add(['Location' => $url]);
@@ -248,13 +229,12 @@ class Response extends Singleton
 	/**
 	 * Реализует код ответа
 	 *
-	 * @param int    $statusCode Код ответа
-	 * @param string $message    Сообщение ответа
+	 * @param int $statusCode Код ответа
+	 * @param string $message Сообщение ответа
 	 *
 	 * @return string
 	 */
-	public function status(int $statusCode, string $message = ''): string
-	{
+	public function status(int $statusCode, string $message = ''): string {
 		$this->headers->removeAll();
 		http_response_code($statusCode);
 		
